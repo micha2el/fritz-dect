@@ -1,0 +1,24 @@
+########################################################################################
+# config start
+########################################################################################
+lastSID=/var/tmp/dect_last.SID             # SID file
+OUTPUT_DIR=/var/www/dect                   # OUTPUT directory
+OUTPUT_WEB=$OUTPUT_DIR/dect.xml            # OUTPUT file for compact data
+OUTPUT_30SEC=$OUTPUT_DIR/dect_30secs_      # OUTPUT file prefix for 30 seconds files
+OUTPUT_HOURLY=$OUTPUT_DIR/dect_hourly_     # OUTPUT file prefix for hourly files
+OUTPUT_DAILY=$OUTPUT_DIR/dect_daily_       # OUTPUT file prefix for daily files
+OUTPUT_MONTHLY=$OUTPUT_DIR/dect_monthly_   # OUTPUT file prefix for monthly files
+TMP_FILE=/var/tmp/dect.xml                 # temp file
+
+########################################################################################
+# fritzbox configuration
+########################################################################################
+box=http://192.168.1.1                     # address of Fritz!Box
+username=name                              # login
+passwort=password                          # password
+
+########################################################################################
+## actor identification number for DECT devices and names
+########################################################################################
+AINS="116300176784 116300172651 116300146166 116300250339"
+NAMES=("Computer" "TV" "Server" "Solar") 

@@ -11,6 +11,7 @@ Not tested, but should also work with:
 * Fritz!Dect 500
 
 ## Getting started
+Copy `dect.config.example` to `dect.config` and adjust configuration variables to your needs. Be sure to insert correct username and password and AINs.
 
 To create entries every 30 seconds create crontab entries like this:
 ```

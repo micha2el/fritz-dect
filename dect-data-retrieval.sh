@@ -1,22 +1,9 @@
 #!/bin/bash
 
 ########################################################################################
-# config start
+# import config variables
 ########################################################################################
-lastSID=/var/tmp/dect_last.SID             # SID file
-OUTPUT_DIR=/var/www/dect                   # OUTPUT directory
-OUTPUT_WEB=$OUTPUT_DIR/dect.xml            # OUTPUT file for compact data
-OUTPUT_SINGLE=$OUTPUT_DIR/dect_30secs_     # OUTPUT file prefix for 30 second outputs
-TMP_FILE=/var/tmp/dect.xml                 # temp file
-
-########################################################################################
-# fritzbox configuration
-########################################################################################
-box=http://192.168.1.1                     # address of Fritz!Box
-username=name                              # login
-passwort=password                          # password
-AINS="116300176784 116300172651 116300146166 116300250339" # Actor identification numbers of devices to read from
-NAMES=("Computer" "TV" "Server" "Solar")   # names for each actor
+source dect.config
 
 ########################################################################################
 # do not manipulate 
@@ -74,7 +61,7 @@ do
 
  DATE=`date +%s`
  printf "<device ain=\"$AIN\" name=\"$NAME\">\n<temp>$TEMP</temp>\n<strom>$CURRENT</strom>\n<verbrauch>$ENERGY</verbrauch>\n$DETAILS\n</device>\n" >> $TMP_FILE
- printf "T=$TEMP,L=$CURRENT,V=$ENERGY,Z=$DATE;\n" >> "$OUTPUT_SINGLE$AIN.data"
+ printf "T=$TEMP,L=$CURRENT,V=$ENERGY,Z=$DATE;\n" >> "$OUTPUT_30SEC$AIN.data"
  COUNTER=$((COUNTER+1))
 
 done

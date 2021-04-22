@@ -1,18 +1,9 @@
 #!/bin/bash
 
 ########################################################################################
-## config variables
+## import config variables
 ########################################################################################
-
-OUTPUT_30SEC=/var/www/dect/dect_30secs_ # OUTPUT file prefix for 30 seconds files
-OUTPUT_HOURLY=/var/www/dect/dect_hourly_ # OUPUT file prefix for hourly files
-OUTPUT_DAILY=/var/www/dect/dect_daily_ # OUPUT file prefix for daily files
-OUTPUT_MONTHLY=/var/www/html/dect/dect_monthly_ # OUPUT file prefix for monthly files
-
-########################################################################################
-## actor identification number for DECT devices
-########################################################################################
-AINS="116300176784 116300172651 116300146166 116300250339"
+source dect.config
 
 ########################################################################################
 ## do not manipulate
