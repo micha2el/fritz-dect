@@ -61,7 +61,7 @@ do
  NAME=${NAMES[$COUNTER]}
  # read temperatur and add ','
  TEMP=`   curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=gettemperature&sid=$SID" 2>/dev/null `
- TEMP=`   echo "scale=1; $DataTemp / 10" | bc `
+ TEMP=`   echo "scale=1; $TEMP / 10" | bc `
 
  # read current 
  CURRENT=`  curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=getswitchpower&sid=$SID" 2>/dev/null `
