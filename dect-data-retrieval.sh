@@ -65,9 +65,9 @@ COUNTER=0
 for AIN in $AINS
 do
  NAME=${NAMES[$COUNTER]}
- # read temperatur and add ','
- TYPE=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=getdeviceinfos&sid=$SID" 2>/dev/null`
- TYPE=`echo $TYPE | grep -oP "(?<=functionbitmask\=\")[^\"]*"`
+ # read device info 
+ DEVINFO=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=getdeviceinfos&sid=$SID" 2>/dev/null`
+ TYPE=`echo $DEVINFO | grep -oP "(?<=functionbitmask\=\")[^\"]*"`
  DEVICE=-1
  if (( $TYPE & 2**(9) )); then
 	DEVICE=1
@@ -98,14 +98,16 @@ do
  elif [ "$DEVICE" = "2" ]; then
   TEMP=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=gettemperature&sid=$SID" 2>/dev/null `
   TEMP=`echo "scale=1; $TEMP / 10" | bc `
+  TSOLL=`echo $DEVINFO | grep -oP "(?<=<tsoll>)[^<]*"`
+  TSOLL=$(( (TSOLL-16)/2 + 8 ))
   # read device infos
   DETAILS=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=getbasicdevicestats&sid=$SID" 2>/dev/null `
   if [ "$DEBUG" = "1" ]; then
-   printf "<device ain=\"$AIN\" name=\"$NAME\" type=\"$DEVICE\">\n<temp>$TEMP</temp>\n<strom>0</strom>\n<verbrauch>0</verbrauch>\n</device>\n"
-   printf "T=$TEMP,L=0,V=0,Z=$DATE;\n"
+   printf "<device ain=\"$AIN\" name=\"$NAME\" type=\"$DEVICE\">\n<temp>$TEMP</temp>\n<tsoll>$TSOLL</tsoll>\n<strom>0</strom>\n<verbrauch>0</verbrauch>\n$DEVINFO\n</device>\n"
+   printf "T=$TEMP,L=0,V=0,Z=$DATE,TS=$TSOLL;\n"
   else
-   printf "<device ain=\"$AIN\" name=\"$NAME\" type=\"$DEVICE\">\n<temp>$TEMP</temp>\n<strom>$CURRENT</strom>\n<verbrauch>$ENERGY</verbrauch>\n$DETAILS\n</device>\n" >> $TMP_FILE
-   printf "T=$TEMP,L=0,V=0,Z=$DATE;\n" >> "$OUTPUT_30SEC$AIN.data"
+   printf "<device ain=\"$AIN\" name=\"$NAME\" type=\"$DEVICE\">\n<temp>$TEMP</temp>\n<tsoll>$TSOLL</tsoll>\n<strom>0</strom>\n<verbrauch>0</verbrauch>\n$DETAILS\n</device>\n" >> $TMP_FILE
+   printf "T=$TEMP,L=0,V=0,Z=$DATE,TS=$TSOLL;\n" >> "$OUTPUT_30SEC$AIN.data"
   fi
  fi
  COUNTER=$((COUNTER+1))
