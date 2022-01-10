@@ -77,13 +77,13 @@ do
  DEVINFO=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=getdeviceinfos&sid=$SID" 2>/dev/null`
  TYPE=`echo $DEVINFO | grep -oP "(?<=functionbitmask\=\")[^\"]*"`
  DEVICE=-1
- if (( $TYPE & 2**(9) )); then
+ if (( $TYPE & 2**9 )); then
 	DEVICE=1
- elif (( $TYPE & 2**(6) )); then
+ elif (( $TYPE & 2**6 )); then
 	DEVICE=2
- elif (( $TYPE & 2**(0) )); then
+ elif (( $TYPE & 2**0 )); then
 	DEVICE=3
- elif (( $TYPE & 2**(5) )); then
+ elif (( $TYPE & 2**5 )); then
 	DEVICE=4
  fi
  DATE=`date +%s`
@@ -135,7 +135,7 @@ do
   DEVDETAILS=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN-$TYPE&switchcmd=getdeviceinfos&sid=$SID" 2>/dev/null`
   SUBTYPE=`echo $DEVDETAILS | grep -oP "(?<=functionbitmask\=\")[^\"]*"`
   SUBDEVICE=-1
-  if (( $SUBTYPE & 2**(18) )); then
+  if (( $SUBTYPE & 2**18 )); then
 	SUBDEVICE=31
   fi
   if [ "$SUBDEVICE" = "31" ]; then
