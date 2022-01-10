@@ -35,6 +35,8 @@ Important: Please adjust the user to a user avaiable on your system with rights 
 ## Testing ##
 To test your configuration you can execute `.\dect-data-retrieval.sh debug` and you will see some output.
 
+## Create graphs from data ##
+I have created simple power graphs to view the extracted data. Please have a look at [power-graphs](https://github.com/micha2el/power-graphs).
 
 ## Thanks
 Thanks to AVM for creating such amazing products. These scripts were created using their documentation.
