@@ -1,22 +1,25 @@
 #!/bin/bash
 
 ########################################################################################
-# import config variables
+# set config variable and import config
 ########################################################################################
-source /usr/local/bin/dect/dect.config
+SOURCE=/usr/local/bin/dect/dect.config
 
 ########################################################################################
-# DEBUG mode ?
+# DO NOT EDIT below here!
 ########################################################################################
+if [[ ! -f $SOURCE ]]; then
+ echo "Config file does not exist... stopping"
+ exit
+fi
+source $SOURCE
+
 DEBUG=0
 if [ "$1" = "debug" ]; then
  DEBUG=1
  echo "Debug Output enabled"
 fi
 
-########################################################################################
-# do not manipulate 
-########################################################################################
 lastSID=$lastSID
 
 # create sid file if not already exists
