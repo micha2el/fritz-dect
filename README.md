@@ -6,7 +6,7 @@ Working with:
 * Fritz!Dect 200 (Readout: temperature, state, current energy consumption, accumulated energy consumption)
 * Fritz!Dect 210 (Readout: temperature, state, current energy consumption, accumulated energy consumption)
 * Fritz!Dect 301 (Readout: temperature, tsoll, battery, window open active, boost active, window open time, boost active time)
-* Fritz!Dect 440 (Readout: temperature, battery)
+* Fritz!Dect 440 (Readout: temperature, humidity, battery)
 * Han-Fun Blinds (e.g. RolloTron Dect 1213 --> readout: level)
 
 Not tested, but should also work with:

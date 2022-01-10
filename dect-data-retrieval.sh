@@ -150,13 +150,14 @@ do
   TEMP=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=gettemperature&sid=$SID" 2>/dev/null `
   TEMP=`echo "scale=1; $TEMP / 10" | bc `
   BATTERY=`echo $DEVINFO | grep -oP "(?<=name><battery>)[^<]*"`
+  HUMIDITY=`echo $DEVINFO | grep -oP "(?<=humidity><rel_humidity>)[^<]*"`
   DETAILS=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=getbasicdevicestats&sid=$SID" 2>/dev/null `
   if [ "$DEBUG" = "1" ]; then
-   printf "<device ain=\"$AIN\" name=\"$NAME\" type=\"$DEVICE\">\n<temp>$TEMP</temp>\n<battery>$BATTERY</battery>\n$DEVINFO\n</device>\n"
-   printf "T=$TEMP,B=$BATTERY,Z=$DATE;\n"
+   printf "<device ain=\"$AIN\" name=\"$NAME\" type=\"$DEVICE\">\n<temp>$TEMP</temp>\n<battery>$BATTERY</battery>\n<humidity>$HUMIDITY</humidity>\n$DEVINFO\n</device>\n"
+   printf "T=$TEMP,B=$BATTERY,H=$HUMIDITY,Z=$DATE;\n"
   else
-   printf "<device ain=\"$AIN\" name=\"$NAME\" type=\"$DEVICE\">\n<temp>$TEMP</temp>\n<battery>$BATTERY</battery>\n$DETAILS\n</device>\n" >> $TMP_FILE
-   printf "T=$TEMP,B=$BATTERY,Z=$DATE;\n" >> "$OUTPUT_30SEC$AIN.data"
+   printf "<device ain=\"$AIN\" name=\"$NAME\" type=\"$DEVICE\">\n<temp>$TEMP</temp>\n<battery>$BATTERY</battery>\n<humidity>$HUMIDITY</humidity>\n$DETAILS\n</device>\n" >> $TMP_FILE
+   printf "T=$TEMP,B=$BATTERY,H=$HUMIDITY,Z=$DATE;\n" >> "$OUTPUT_30SEC$AIN.data"
   fi
  fi
  COUNTER=$((COUNTER+1))
