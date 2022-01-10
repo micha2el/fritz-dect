@@ -20,6 +20,17 @@ if [ "$1" = "debug" ]; then
  echo "Debug Output enabled"
 fi
 
+########################################################################################
+# functions to replace grep if necessary
+########################################################################################
+grep_data() {
+ echo -n "$1" | grep -o "<$2>.*<\/$2>" | cut -f2 -d"<" | cut -f2 -d">"
+}
+grep_digit_property() {
+ echo -n "$1" | grep -o "$2=\"[0-9]*\"" | cut -f2 -d"\""
+}
+########################################################################################
+
 lastSID=$lastSID
 
 # create sid file if not already exists
@@ -30,10 +41,10 @@ SID=$(cat $lastSID)
 
 # check SID
 LOGIN=$(curl $box/login_sid.lua?sid=$SID 2>/dev/null)
-SID=$(echo -n "$LOGIN" | grep -oP "(?<=<SID>)[^<]*")
+SID=$(grep_data "$LOGIN" "SID")
 
 # read dynamic password salt
-Challenge=$(echo -n "$LOGIN" | grep -oP "(?<=<Challenge>)[^<]*")
+Challenge=$(grep_data "$LOGIN" "Challenge")
 
 # blocktime and rights are not used as of now
 # BlockTime=`sed -n -e 's/.*<BlockTime>\(.*\)<\/BlockTime>.*/\1/p' <<<$LOGIN`
@@ -51,7 +62,7 @@ then
   else
     ACCESS=$(curl -s "$box/login_sid.lua" -d "response=$response" -d 'username='${username} 2>/dev/null)
   fi
-  SID=$(echo -n "$ACCESS" | grep -oP "(?<=<SID>)[^<]*")
+  SID=$(grep_data "$ACCESS" "SID")
 #   BlockTime=`sed -n -e 's/.*<BlockTime>\(.*\)<\/BlockTime>.*/\1/p' <<<$ACCESS`
 #   Rights=`sed -n -e 's/.*<Rights>\(.*\)<\/Rights>.*/\1/p' <<<$ACCESS`
 fi
@@ -75,7 +86,7 @@ do
  NAME=${NAMES[$COUNTER]}
  # read device info 
  DEVINFO=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=getdeviceinfos&sid=$SID" 2>/dev/null`
- TYPE=`echo $DEVINFO | grep -oP "(?<=functionbitmask\=\")[^\"]*"`
+ TYPE=$(grep_digit_property "$DEVINFO" "functionbitmask")
  DEVICE=-1
  if (( $TYPE & 2**9 )); then
 	DEVICE=1
@@ -91,7 +102,7 @@ do
   # Outlet / Switch
   TEMP=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=gettemperature&sid=$SID" 2>/dev/null `
   TEMP=`echo "scale=1; $TEMP / 10" | bc `
-  STATE=`echo $DEVINFO | grep -oP "(?<=<switch><state>)[^<]*"`
+  STATE=$(grep_data "$DEVINFO" "state")
 
   # read current 
   CURRENT=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=getswitchpower&sid=$SID" 2>/dev/null `
@@ -113,13 +124,13 @@ do
   # HKR
   TEMP=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=gettemperature&sid=$SID" 2>/dev/null `
   TEMP=`echo "scale=1; $TEMP / 10" | bc `
-  TSOLL=`echo $DEVINFO | grep -oP "(?<=<tsoll>)[^<]*"`
+  TSOLL=$(grep_data "$DEVINFO" "tsoll")
   TSOLL=$(( (TSOLL-16)/2 + 8 ))
-  WOPEN=`echo $DEVINFO | grep -oP "(?<=<windowopenactiv>)[^<]*"`
-  WOPENTIME=`echo $DEVINFO | grep -oP "(?<=<windowopenactiveendtime>)[^<]*"`
-  BATTERY=`echo $DEVINFO | grep -oP "(?<=name><battery>)[^<]*"`
-  BOOST=`echo $DEVINFO | grep -oP "(?<=<boostactive>)[^<]*"`
-  BOOSTTIME=`echo $DEVINFO | grep -oP "(?<=<boostactiveendtime>)[^<]*"`
+  WOPEN=$(grep_data "$DEVINFO" "windowopenactiv")
+  WOPENTIME=$(grep_data "$DEVINFO" "windowopenactiveendtime")
+  BATTERY=$(grep_data "$DEVINFO" "battery")
+  BOOST=$(grep_data "$DEVINFO" "boostactive")
+  BOOSTTIME=$(grep_data "$DEVINFO" "boostactiveendtime")
   # read device infos
   DETAILS=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=getbasicdevicestats&sid=$SID" 2>/dev/null `
   if [ "$DEBUG" = "1" ]; then
@@ -133,13 +144,13 @@ do
   # HAN FUN Device
   # read device infos
   DEVDETAILS=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN-$TYPE&switchcmd=getdeviceinfos&sid=$SID" 2>/dev/null`
-  SUBTYPE=`echo $DEVDETAILS | grep -oP "(?<=functionbitmask\=\")[^\"]*"`
+  SUBTYPE=$(grep_digit_property "$DEVDETAILS" "functionbitmask")
   SUBDEVICE=-1
   if (( $SUBTYPE & 2**18 )); then
 	SUBDEVICE=31
   fi
   if [ "$SUBDEVICE" = "31" ]; then
-   LEVEL=`echo $DEVDETAILS | grep -oP "(?<=<levelpercentage>)[^<]*"`
+   LEVEL=$(grep_data "$DEVDETAILS" "levelpercentage")
    if [ "$DEBUG" = "1" ]; then
     printf "<device ain=\"$AIN\" name=\"$NAME\" type=\"$SUBDEVICE\">\n<level>$LEVEL</level>\n$DEVDETAILS\n</device>\n"
    else
@@ -149,8 +160,8 @@ do
  elif [ "$DEVICE" = "4" ]; then
   TEMP=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=gettemperature&sid=$SID" 2>/dev/null `
   TEMP=`echo "scale=1; $TEMP / 10" | bc `
-  BATTERY=`echo $DEVINFO | grep -oP "(?<=name><battery>)[^<]*"`
-  HUMIDITY=`echo $DEVINFO | grep -oP "(?<=humidity><rel_humidity>)[^<]*"`
+  BATTERY=$(grep_data "$DEVINFO" "battery")
+  HUMIDITY=$(grep_data "$DEVINFO" "rel_humidity")
   DETAILS=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=getbasicdevicestats&sid=$SID" 2>/dev/null `
   if [ "$DEBUG" = "1" ]; then
    printf "<device ain=\"$AIN\" name=\"$NAME\" type=\"$DEVICE\">\n<temp>$TEMP</temp>\n<battery>$BATTERY</battery>\n<humidity>$HUMIDITY</humidity>\n$DEVINFO\n</device>\n"
