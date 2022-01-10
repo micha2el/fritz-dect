@@ -2,12 +2,12 @@
 Read data from Fritz!Box using Fritz!DECT devices.
 
 Working with:
+* Fritz!Dect 100
 * Fritz!Dect 200
 * Fritz!Dect 210
-* Fritz!Dect 100
+* Fritz!Dect 301
 
 Not tested, but should also work with:
-* Fritz!Dect 301
 * Fritz!Dect 500
 
 ## Getting started
@@ -27,6 +27,10 @@ To create hourly, daily and monthly data we just copy from the last 30 seconds d
 1 6     * * *   root    /usr/local/bin/dect/dect-cron.sh -d
 1 6     1 * *   root    /usr/local/bin/dect/dect-cron.sh -m
 ```
+
+## Testing ##
+To test your configuration you can execute `.\dect-data-retrieval.sh debug` and you will see some output.
+
 
 ## Thanks
 Thanks to AVM for creating such amazing products. These scripts were created using their documentation.

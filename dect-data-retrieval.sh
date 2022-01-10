@@ -54,6 +54,10 @@ then
 #   Rights=`sed -n -e 's/.*<Rights>\(.*\)<\/Rights>.*/\1/p' <<<$ACCESS`
 fi
 
+if [ "$SID" = "0000000000000000" ];then
+	echo "Could not log into Fritz!Box. Check credentials?"
+	exit
+fi
 # read AIN data
 if [ "$DEBUG" = "1" ]
 then
