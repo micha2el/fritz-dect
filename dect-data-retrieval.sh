@@ -30,10 +30,10 @@ SID=$(cat $lastSID)
 
 # check SID
 LOGIN=$(curl $box/login_sid.lua?sid=$SID 2>/dev/null)
-SID=$(sed -n -e 's/.*<SID>\(.*\)<\/SID>.*/\1/p' <<<$LOGIN )
+SID=$(echo -n "$LOGIN" | grep -oP "(?<=<SID>)[^<]*")
 
 # read dynamic password salt
-Challenge=$(sed -n -e 's/.*<Challenge>\(.*\)<\/Challenge>.*/\1/p' <<<$LOGIN)
+Challenge=$(echo -n "$LOGIN" | grep -oP "(?<=<Challenge>)[^<]*")
 
 # blocktime and rights are not used as of now
 # BlockTime=`sed -n -e 's/.*<BlockTime>\(.*\)<\/BlockTime>.*/\1/p' <<<$LOGIN`
@@ -51,8 +51,7 @@ then
   else
     ACCESS=$(curl -s "$box/login_sid.lua" -d "response=$response" -d 'username='${username} 2>/dev/null)
   fi
-
-  SID=$(sed -n -e 's/.*<SID>\(.*\)<\/SID>.*/\1/p' <<<$ACCESS)
+  SID=$(echo -n "$ACCESS" | grep -oP "(?<=<SID>)[^<]*")
 #   BlockTime=`sed -n -e 's/.*<BlockTime>\(.*\)<\/BlockTime>.*/\1/p' <<<$ACCESS`
 #   Rights=`sed -n -e 's/.*<Rights>\(.*\)<\/Rights>.*/\1/p' <<<$ACCESS`
 fi
