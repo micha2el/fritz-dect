@@ -55,7 +55,10 @@ if [ "$SID" = "0000000000000000" ]
 then
   PWSTRING="$Challenge-$passwort"
   PWHASH=$(echo -n "$PWSTRING" |sed -e 's,.,&\n,g' | tr '\n' '\0' | md5sum | grep -o "[0-9a-z]\{32\}")
+  echo $PWHASH
   response="$Challenge-$PWHASH"
+  echo $response
+  echo $box
   if [ "$DEBUG" = "1" ]
   then
     echo "curl -s \"$box/login_sid.lua\" -d \"response=$response\" -d 'username='${username}"
