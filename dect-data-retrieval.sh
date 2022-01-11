@@ -58,11 +58,13 @@ then
   response="$Challenge-$PWHASH"
   if [ "$DEBUG" = "1" ]
   then
+    echo "curl -s \"$box/login_sid.lua\" -d \"response=$response\" -d 'username='${username}"
     ACCESS=$(curl -s "$box/login_sid.lua" -d "response=$response" -d 'username='${username})
   else
     ACCESS=$(curl -s "$box/login_sid.lua" -d "response=$response" -d 'username='${username} 2>/dev/null)
   fi
   SID=$(grep_data "$ACCESS" "SID")
+  echo "$ACCESS"
 #   BlockTime=`sed -n -e 's/.*<BlockTime>\(.*\)<\/BlockTime>.*/\1/p' <<<$ACCESS`
 #   Rights=`sed -n -e 's/.*<Rights>\(.*\)<\/Rights>.*/\1/p' <<<$ACCESS`
 fi
