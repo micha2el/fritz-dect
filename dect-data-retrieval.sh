@@ -20,6 +20,8 @@ if [ "$1" = "debug" ]; then
  echo "Debug Output enabled"
 fi
 
+TMP_FILE=$TMP_FILE"_"$RANDOM
+
 ########################################################################################
 # functions to replace grep if necessary
 ########################################################################################
@@ -27,7 +29,7 @@ grep_data() {
  echo -n "$1" | grep -o "<$2>.*<\/$2>" | cut -f2 -d"<" | cut -f2 -d">"
 }
 grep_digit_property() {
- echo -n "$1" | grep -o "$2=\"[0-9]*\"" | cut -f2 -d"\""
+ echo -n "$1" | grep -o "$2=\"[0-9 ]*\"" | cut -f2 -d"\""
 }
 ########################################################################################
 
@@ -53,6 +55,9 @@ Challenge=$(grep_data "$LOGIN" "Challenge")
 # check if login is necessary
 if [ "$SID" = "0000000000000000" ]
 then
+  if [ "$DEBUG" = "1" ]; then
+	  echo "SID empty, logging in..."
+  fi
   PWSTRING="$Challenge-$passwort"
   PWHASH=$(echo -n "$PWSTRING" |sed -e 's,.,&\n,g' | tr '\n' '\0' | md5sum | grep -o "[0-9a-z]\{32\}")
   response="$Challenge-$PWHASH"
@@ -71,6 +76,9 @@ if [ "$SID" = "0000000000000000" ];then
 	echo "Could not log into Fritz!Box. Check credentials?"
 	exit
 fi
+if [ "$DEBUG" = "1" ]; then
+	echo "... logged in!"
+fi
 # read AIN data
 if [ "$DEBUG" = "1" ]
 then
@@ -81,22 +89,46 @@ else
  printf "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<devices>\n" > $TMP_FILE
 fi
 COUNTER=0
+ALLDEVS=`curl "$box/webservices/homeautoswitch.lua?switchcmd=getdevicelistinfos&sid=$SID" 2>/dev/null`
+ALLDEVS=${ALLDEVS// /_\#}
+ALLDEVS=${ALLDEVS//device_#identifier/ devide_\#identifier}
+if [ "$DEBUG" = "1" ]; then
+	echo $ALLDEVS
+fi
+ALLDEVS=($(echo $ALLDEVS | tr " " "\n"))
+
 for AIN in $AINS
 do
  NAME=${NAMES[$COUNTER]}
  # read device info 
- DEVINFO=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=getdeviceinfos&sid=$SID" 2>/dev/null`
+ DEVINFO=""
+ for i in "${ALLDEVS[@]}"
+ do
+	DEV=${i//_\#/ }
+	DEVID=$(grep_digit_property "$DEV" "identifier")
+	DEVID=${DEVID// /}
+	if [ "$DEVID" = "$AIN" ]; then
+		DEVINFO="<"$DEV
+		break;
+	fi
+ done
+ #DEVINFO=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=getdeviceinfos&sid=$SID" 2>/dev/null`
  TYPE=$(grep_digit_property "$DEVINFO" "functionbitmask")
  DEVICE=-1
- if (( $TYPE & 2**9 )); then
-	DEVICE=1
- elif (( $TYPE & 2**6 )); then
-	DEVICE=2
- elif (( $TYPE & 2**0 )); then
-	DEVICE=3
- elif (( $TYPE & 2**5 )); then
-	DEVICE=4
+ if [ "$DEBUG" = "1" ]; then
+	 echo "TYPE = $TYPE"
  fi
+ if [[ $TYPE =~ ^[0-9]+$ ]]; then
+	if (( $TYPE & 2**9 )); then
+		DEVICE=1
+	elif (( $TYPE & 2**6 )); then
+		DEVICE=2
+	elif (( $TYPE & 2**0 )); then
+		DEVICE=3
+	elif (( $TYPE & 2**5 )); then
+		DEVICE=4
+ 	fi
+ fi	
  DATE=`date +%s`
  if [ "$DEVICE" = "1" ]; then
   # Outlet / Switch
@@ -179,4 +211,3 @@ else
  printf "</devices>\n" >> $TMP_FILE
  mv $TMP_FILE $OUTPUT_WEB
 fi
-
