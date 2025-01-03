@@ -29,7 +29,7 @@ grep_data() {
  echo -n "$1" | grep -o "<$2>.*<\/$2>" | cut -f2 -d"<" | cut -f2 -d">"
 }
 grep_digit_property() {
- echo -n "$1" | grep -o "$2=\"[0-9 ]*\"" | cut -f2 -d"\""
+ echo -n "$1" | grep -o "$2=\"[0-9 ]*\"" | cut -f2 -d"\"" 
 }
 ########################################################################################
 
@@ -92,6 +92,7 @@ COUNTER=0
 ALLDEVS=`curl "$box/webservices/homeautoswitch.lua?switchcmd=getdevicelistinfos&sid=$SID" 2>/dev/null`
 ALLDEVS=${ALLDEVS// /_\#}
 ALLDEVS=${ALLDEVS//device_#identifier/ devide_\#identifier}
+ALLDEVS=${ALLDEVS//group_#synchronized/ group_\#synchronized}
 if [ "$DEBUG" = "1" ]; then
 	echo $ALLDEVS
 fi
@@ -113,6 +114,11 @@ do
 	fi
  done
  #DEVINFO=`curl "$box/webservices/homeautoswitch.lua?ain=$AIN&switchcmd=getdeviceinfos&sid=$SID" 2>/dev/null`
+ if [ "$DEBUG" = "1" ]; then
+	 echo "DEVID = $DEVID"
+	 echo "DEVINFO = $DEVINFO"
+ fi
+
  TYPE=$(grep_digit_property "$DEVINFO" "functionbitmask")
  DEVICE=-1
  if [ "$DEBUG" = "1" ]; then
@@ -128,6 +134,13 @@ do
 	elif (( $TYPE & 2**5 )); then
 		DEVICE=4
  	fi
+	if [ "$DEBUG" = "1" ]; then
+		echo "TYPE PREGMATCH; DEVICE = $DEVICE"
+	fi
+ else
+	if [ "$DEBUG" = "1" ]; then
+		echo "ERROR PREGMATCH!!! TYPE = '$TYPE'"
+	fi
  fi	
  DATE=`date +%s`
  if [ "$DEVICE" = "1" ]; then
